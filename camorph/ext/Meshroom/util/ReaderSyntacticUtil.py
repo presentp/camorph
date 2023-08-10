@@ -28,7 +28,8 @@ def read_sfm(input_path):
                 cam.t = np.asarray([float(x) for x in transform['center']])
                 rotmat = np.asarray([float(x) for x in transform['rotation']]).reshape((3,3))
                 cam.r = Quaternion(matrix = rotmat)
-                cam.focal_length_px = [float(intrinsic['pxFocalLength']),float(intrinsic['pxFocalLength'])]
+                #cam.focal_length_px = [float(intrinsic['pxFocalLength']),float(intrinsic['pxFocalLength'])] // pxFocalLength should be FocalLength as it is in Meshrooms cameras.sfm file.
+                cam.focal_length_px = [float(intrinsic['FocalLength']),float(intrinsic['FocalLength'])]
                 cam.projection_type = 'perspective'
                 cam.resolution = (float(view['width']), float(view['height']))
                 cam.principal_point = tuple([float(x) for x in intrinsic['principalPoint']])
@@ -39,7 +40,8 @@ def read_sfm(input_path):
                     cam.radial_distortion = [float(x) for x in intrinsic['distortionParams']]
                 else:
                     cam.model = 'pinhole'
-                cam.source_image = re.sub('/', os.path.sep, view['path'])
+                #cam.source_image = re.sub('/', os.path.sep, view['path']) // This code does not seem to work on a Windows system. I propose a simpler implementation below chich does work.
+                cam.source_image = view['path'].replace('/', os.path.sep)
                 cams.append(cam)
 
     return cams
